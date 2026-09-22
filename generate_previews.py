@@ -16,7 +16,7 @@ from main import OmoriPythonGame
 from quests import QUEST_DATA
 
 def capture_all():
-    artifact_dir = r"C:\Users\ASUS\.gemini\antigravity-ide\brain\60317c38-2e81-419f-b80c-107e7cedf30d"
+    artifact_dir = os.path.join(os.path.dirname(__file__), "assets", "screenshots")
     os.makedirs(artifact_dir, exist_ok=True)
     
     game = OmoriPythonGame()
