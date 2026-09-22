@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OMORI: Pulau Sintaksis (Full 3D WebGL Edition)</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Three.js 3D WebGL Library CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+  <div id="game-container">
+    <!-- Canvas 3D WebGL Game Utama -->
+    <canvas id="game-canvas" width="960" height="640"></canvas>
+
+    <!-- Top HUD -->
+    <div id="hud">
+      <div class="hud-pill" id="hud-location">Quest 1/10: Pantai Hampa (Pesisir 3D)</div>
+      <div class="hud-pill" id="hud-inventory-btn" style="pointer-events: auto; cursor: pointer;">🎒 Pesawat 3D: 0/10 Bagian [TAB]</div>
+    </div>
+
+    <!-- Bottom Controls Hint -->
+    <div class="hud-bottom-bar">
+      WASD / Panah: Gerak 3D &nbsp;|&nbsp; [E] / [Spasi]: Interaksi / Bicara &nbsp;|&nbsp; [TAB] / [I]: Buku Progres
+    </div>
+
+    <!-- Toast Notification Banner -->
+    <div id="toast-banner" class="hidden">★ Notifikasi</div>
+
+    <!-- TITLE SCREEN OVERLAY -->
+    <div id="title-screen" class="overlay">
+      <div class="lightbulb-holder">
+        <div class="lightbulb-wire"></div>
+        <div class="lightbulb-bulb"></div>
+      </div>
+
+      <div class="title-header">
+        <h1 class="title-main">PULAU SINTAKSIS 3D</h1>
+        <p class="title-sub">Full 3D Open-World Island RPG • Three.js WebGL</p>
+      </div>
+
+      <div class="omori-box title-card">
+        <ul>
+          <li>Eksplorasi Pulau 3D Terbuka: Pantai Pasir, Danau, Desa Warga, Hutan & Tebing Pegunungan</li>
+          <li>Kamera 3D Third-Person & Karakter 3D Animasi Berjalan</li>
+          <li>Pesawat Rusak 3D di Alun-Alun Tengah yang Berevolusi Bertahap</li>
+          <li>Mini-Game Aksi Arkade: Tembak Bug, Lompat Duri & Balap Sprint</li>
+          <li>10 Quest Python Lengkap: Pseudocode, Scavenger Hunt & Interaksi Rumah Desa</li>
+        </ul>
+      </div>
+
+      <button id="btn-start-game" class="press-start-btn">▶ TEKAN DI SINI / [ENTER] UNTUK MEMULAI</button>
+    </div>
+
+    <!-- PROLOGUE CUTSCENE OVERLAY -->
+    <div id="intro-screen" class="overlay hidden">
+      <div class="omori-box intro-box">
+        <div class="intro-header" id="intro-header-text">PROLOGUE : Terdampar di Pulau Sintaksis (1/5)</div>
+        <div class="intro-body" id="intro-body-text">...</div>
+        <div class="intro-footer">
+          <button id="btn-next-intro" class="btn-retro">Lanjut [SPASI] ▶</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUEST MODAL OVERLAY -->
+    <div id="quest-modal" class="overlay hidden">
+      <div class="omori-box quest-window">
+        <!-- Header: Portrait NPC + Nama & Quest Info -->
+        <div class="quest-header-bar">
+          <div class="npc-portrait-box" style="display: flex; align-items: center; justify-content: center; font-size: 32px; background: #251e38; border: 2px solid var(--pastel-pink); border-radius: 6px;">
+            ✨
+          </div>
+          <div class="npc-info">
+            <div class="quest-badge" id="modal-quest-badge">[ QUEST 1/10 : PANTAI HAMPA ]</div>
+            <div class="npc-name" id="modal-npc-name">Mori Si Kerang Surealis</div>
+            <div class="quest-topic" id="modal-quest-topic">Topik: print() & input()</div>
+            <div class="npc-story-text" id="modal-npc-story">"..."</div>
+          </div>
+          <button class="btn-close-modal" id="btn-close-quest">✕</button>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="quest-tabs">
+          <button class="tab-btn" id="tab-btn-lesson">📖 Cerita & Pseudocode</button>
+          <button class="tab-btn active" id="tab-btn-code">⌨️ Editor Koding</button>
+          <button class="tab-btn" id="tab-btn-minigame">🎮 Mini-Game Aksi (<span id="tab-score-badge">0/100 Poin</span>)</button>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+          <!-- 1. Lesson Tab -->
+          <div class="tab-pane" id="tab-pane-lesson">
+            <div class="lesson-card" id="modal-lesson-content">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <!-- 2. Code Tab -->
+          <div class="tab-pane active" id="tab-pane-code">
+            <div class="editor-wrapper">
+              <textarea id="code-input" class="code-textarea" spellcheck="false" placeholder="# Lengkapi pseudocode ini..."></textarea>
+              <div class="task-prompt-bar" id="modal-task-prompt">Instruksi: Pahami pseudocode di atas lalu lengkapi kodenya!</div>
+            </div>
+          </div>
+
+          <!-- 3. Mini-Game Aksi Tab -->
+          <div class="tab-pane" id="tab-pane-minigame">
+            <div class="minigame-container">
+              <canvas id="minigame-canvas" width="830" height="230" style="width: 100%; height: 230px; border-radius: 6px; border: 1px solid var(--pastel-purple); display: block;"></canvas>
+              <div style="font-size: 11px; color: var(--pastel-yellow); text-align: center; margin-top: 4px;">
+                🕹️ Kontrol Arkade: A / D (Gerak) & [SPASI / W / Panah Atas] (Tembak / Lompat) • Kumpulkan 100 Poin!
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feedback Box -->
+        <div class="feedback-box hidden" id="modal-feedback-box">
+          <span id="modal-feedback-text">Feedback</span>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="quest-actions">
+          <button class="btn-retro" id="btn-reset-code">↺ Reset Template</button>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn-retro btn-hint" id="btn-quest-hint">💡 Petunjuk</button>
+            <button class="btn-retro btn-submit" id="btn-submit-code">▶ Selesaikan Quest</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INVENTORY / PROGRES PESAWAT OVERLAY -->
+    <div id="inventory-modal" class="overlay hidden">
+      <div class="omori-box inv-window">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h2 style="font-size: 20px; color: var(--pastel-pink);">✈️ BUKU PROGRES PESAWAT 3D & INVENTARIS</h2>
+          <button class="btn-close-modal" id="btn-close-inventory">✕</button>
+        </div>
+        <p style="font-size: 13px; color: var(--pastel-mint); margin-top: 4px;">Daftar suku cadang pesawat 3D dan materi Python yang telah kamu selesaikan:</p>
+
+        <div class="inv-grid" id="inv-grid-container">
+          <!-- Populated by JS -->
+        </div>
+
+        <div style="text-align: center; margin-top: 6px;">
+          <button class="btn-retro" id="btn-close-inv-bottom">Tutup Catatan [TAB / ESC]</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ENDING / EPILOGUE OVERLAY -->
+    <div id="ending-screen" class="overlay hidden">
+      <div class="omori-box" style="width: 760px; padding: 36px; text-align: center;">
+        <h2 style="font-size: 26px; color: var(--pastel-yellow); margin-bottom: 12px;">★ SELAMAT! PESAWAT 3D TELAH LEPAS LANDAS! ★</h2>
+        <p style="font-size: 15px; color: var(--pastel-mint); margin-bottom: 20px;">Kamu telah menuntaskan seluruh tantangan dasar Python, memenangkan mini-game aksi, dan menerbangkan pesawat 3D!</p>
+
+        <div style="background: rgba(16, 12, 28, 0.9); border: 1px solid var(--pastel-purple); border-radius: 8px; padding: 18px; text-align: left; font-size: 13px; line-height: 1.8; color: #ddd6f3; margin-bottom: 24px;">
+          ✈️ <b>Pencapaian Petualangan 3D:</b><br>
+          • Model 3D Pesawat Lengkap: Sayap, Baling-Baling, Radar, dan Turbin Menyala<br>
+          • Menguasai 10 Materi Dasar Python: print, input, Variabel, Tipe Data, Modulo, if-elif-else, List, Dict, Loops, Fungsi, Error Handling<br>
+          • Eksplorasi Penuh Pulau 3D: Pantai, Hutan, Danau, Tebing, dan Rumah Warga Desa!
+        </div>
+
+        <button class="btn-retro" id="btn-restart-game" style="font-size: 15px; padding: 10px 28px;">↺ Mainkan Lagi dari Awal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="audio.js"></script>
+  <script src="minigames.js"></script>
+  <script src="quests.js"></script>
+  <script src="game3d.js"></script>
+</body>
+</html>
